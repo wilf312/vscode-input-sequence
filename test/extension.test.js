@@ -1,8 +1,6 @@
 /* global suite, test */
 
 var assert = require('assert');
-var vscode = require('vscode');
-var ext = require('../extension');
 var loadModule = require('./module-loader').loadModule;
 
 suite("Extension Tests", function () {

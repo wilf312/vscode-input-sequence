@@ -50,14 +50,15 @@
   "scripts": {
     "postinstall": "node ./node_modules/vscode/bin/install",
     "test": "node ./node_modules/vscode/bin/test",
+    "eslint": "eslint . --fix",
     "package": "vsce package"
   },
   "devDependencies": {
-    "eslint": "^3.6.0",
-    "eslint-plugin-node": "^2.1.1",
-    "typescript": "^2.0.3",
+    "eslint": "^7.13.0",
+    "eslint-plugin-node": "^11.1.0",
+    "typescript": "^4.0.5",
     "vm": "^0.1.0",
     "vsce": "^1.14.0",
-    "vscode": "^0.11.0"
+    "vscode": "^1.1.37"
   }
 }

@@ -2,7 +2,7 @@
 var vscode = require('vscode');
 var Range = vscode.Range;
 var Position = vscode.Position;
-var syntaxRegex = /^([+\-]?[\da-fA-F]+(?:\.\d+)?)\s*([+\-]|(?:\+\+|\-\-))?\s*(\d+)?\s*(?:\:\s*(\d+))?\s*(?:\:\s*(\d+))?$/;
+var syntaxRegex = /^([+-]?[\da-fA-F]+(?:\.\d+)?)\s*([+-]|(?:\+\+|--))?\s*(\d+)?\s*(?::\s*(\d+))?\s*(?::\s*(\d+))?$/;
 
 // this method is called when your extension is activated
 function activate(context) {
@@ -78,7 +78,7 @@ function parseInput(input) {
   var digit = parseInt(matches[4], 10);
   if (isNaN(digit)) {
     digit = (start.toString() === matches[1]) ? 0 : matches[1].length;
-    if (/^[+\-]/.test(matches[1])) {
+    if (/^[+-]/.test(matches[1])) {
       digit = Math.max(digit - 1, 0);
     }
   }
