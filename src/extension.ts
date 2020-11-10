@@ -1,21 +1,25 @@
-'use strict';
-var vscode = require('vscode');
-var Range = vscode.Range;
-var Position = vscode.Position;
-var syntaxRegex = /^([+-]?[\da-fA-F]+(?:\.\d+)?)\s*([+-]|(?:\+\+|--))?\s*(\d+)?\s*(?::\s*(\d+))?\s*(?::\s*(\d+))?$/;
+import { ExtensionContext, commands, workspace, window, Range, Position, InputBoxOptions, Selection, TextEditor } from 'vscode';
 
+type Options = {
+  start: number
+  digit: number
+  operator: string
+  step: number
+  radix: number
+  input: string
+}
 // this method is called when your extension is activated
-function activate(context) {
-  var insertCmd = vscode.commands.registerCommand('insertSequentialNumbers', function () {
-    var editor = vscode.window.activeTextEditor;
+function activate(context: ExtensionContext) {
+  var insertCmd = commands.registerCommand('insertSequentialNumbers', function () {
+    var editor = window.activeTextEditor;
     var initialSelections = editor.selections.sort(sortSelection);
-    var inputOptions = {};
+    var inputOptions:InputBoxOptions = {};
     var undoStopBefore = true;
     inputOptions.placeHolder = "<start> <operator> <step> : <digit> : <radix>";
     inputOptions.validateInput = function (param) {
       if (param === "") {
-        perform(initialSelections, editor, {}, { undoStopBefore: undoStopBefore, undoStopAfter: false });
-        return;
+        perform(initialSelections, editor, null, { undoStopBefore: undoStopBefore, undoStopAfter: false });
+        return ''
       }
       var test = parseInput(param);
       if (!test) {
@@ -23,20 +27,24 @@ function activate(context) {
       }
       // realtime simulate
       perform(initialSelections, editor, test, { undoStopBefore: undoStopBefore, undoStopAfter: false });
-      undoStopBefore &= false;
+      undoStopBefore = undoStopBefore && false;
+      return ''
     };
-    vscode.window.showInputBox(inputOptions)
+    window.showInputBox(inputOptions)
       .then(function (value) {
-        if (!value && value !== 0) {
+        if (!value) {
           // undo
           if (!undoStopBefore) {
-            vscode.commands.executeCommand("undo");
+            commands.executeCommand("undo");
           }
           return;
         }
         // confirm input.
-        var options = parseInput(value);
-        perform(initialSelections, editor, options, { undoStopBefore: false, undoStopAfter: true });
+        const options = parseInput(value);
+        if (options) {
+          console.error('Syntax error. The rule is "<start> <operator> <step> : <digit> : <radix>".')
+          perform(initialSelections, editor, options, { undoStopBefore: false, undoStopAfter: true });
+        }
       });
   });
 
@@ -49,13 +57,13 @@ function deactivate() {
 }
 exports.deactivate = deactivate;
 
-function sortSelection(a, b) {
+function sortSelection(a: Selection, b: Selection) {
   return a.anchor.line - b.anchor.line || a.anchor.character - b.anchor.character;
 }
 
-function perform(initial, editor, options, undoStop) {
+function perform(initial: Selection[], editor: TextEditor, options: Options, undoStop: Parameters<TextEditor['edit']>[1]) {
   var currentSelection = editor.selections.sort(sortSelection);
-  var replaceSelection = vscode.workspace.getConfiguration("sequence").replaceSelection;
+  var replaceSelection = workspace.getConfiguration("sequence").replaceSelection;
   editor.edit(function (builder) {
     initial.forEach(function (selection, index) {
       var endOfInitialSelection = replaceSelection ? selection.start.character : selection.end.character + (currentSelection[index].start.character - selection.start.character);
@@ -64,24 +72,26 @@ function perform(initial, editor, options, undoStop) {
   }, undoStop);
 }
 
-function parseInput(input) {
-  var matches = input.match(syntaxRegex);
+const syntaxRegex = /^([+-]?[\da-fA-F]+(?:\.\d+)?)\s*([+-]|(?:\+\+|--))?\s*(\d+)?\s*(?::\s*(\d+))?\s*(?::\s*(\d+))?$/;
+function parseInput(input: string): Options | null {
+  const matches: RegExpMatchArray | null = input.match(syntaxRegex);
   if (!matches) {
     return null;
   }
 
-  var radix = matches[5] ? parseInt(matches[5], 10) : 10;
-  var start = parseInt(matches[1], radix);
-  var operator = matches[2] || "+";
-  var step = isNaN(matches[3]) ? 1 : parseInt(matches[3], 10);
+  const radix = matches[5] ? parseInt(matches[5], 10) : 10;
+  const start = parseInt(matches[1], radix);
+  const operator = matches[2] || "+";
+  const step = isNaN(matches[3]) ? 1 : parseInt(matches[3], 10);
 
-  var digit = parseInt(matches[4], 10);
+  let digit = parseInt(matches[4], 10);
   if (isNaN(digit)) {
     digit = (start.toString() === matches[1]) ? 0 : matches[1].length;
     if (/^[+-]/.test(matches[1])) {
       digit = Math.max(digit - 1, 0);
     }
   }
+
   return {
     start: start,
     digit: digit,
@@ -92,7 +102,7 @@ function parseInput(input) {
   };
 }
 
-function calculate(index, options) {
+function calculate(index: number, options: Options): string {
   var value = NaN;
   switch (options.operator) {
     case "++":
@@ -111,16 +121,16 @@ function calculate(index, options) {
       return "";
   }
 
-  value = paddingZero(value, options.digit, options.radix);
+  const valueString = paddingZero(value, options.digit, options.radix);
   var hasAlpha = options.input.match(/([a-fA-F])/);
   if (hasAlpha) {
     // for hex.
-    return hasAlpha[1] == hasAlpha[1].toLowerCase() ? value.toLowerCase() : value.toUpperCase();
+    return hasAlpha[1] == hasAlpha[1].toLowerCase() ? valueString.toLowerCase() : valueString.toUpperCase();
   }
-  return value;
+  return valueString
 }
 
-function paddingZero(num, dig, radix) {
+function paddingZero(num: number, dig: number, radix: number): string {
   if (!dig) {
     dig = 0;
   }
