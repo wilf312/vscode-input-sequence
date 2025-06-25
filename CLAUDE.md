@@ -34,19 +34,19 @@
 
 ### テスト
 ```bash
-npm test
+pnpm test
 ```
 VS Code拡張テストランナーを使用してテストスイートを実行します。
 
 ### パッケージング
 ```bash
-npm run package  
+pnpm run package  
 ```
 vsce (Visual Studio Code Extension) ツールを使用して .vsix パッケージファイルを作成します。
 
 ### インストール
 ```bash
-npm run postinstall
+pnpm install
 ```
 VS Code拡張開発の依存関係をインストールします。
 

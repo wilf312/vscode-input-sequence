@@ -48,9 +48,9 @@
     ]
   },
   "scripts": {
-    "postinstall": "node ./node_modules/vscode/bin/install",
-    "test": "node ./node_modules/vscode/bin/test",
-    "package": "vsce package"
+    "postinstall": "pnpm exec node ./node_modules/vscode/bin/install",
+    "test": "pnpm exec node ./node_modules/vscode/bin/test",
+    "package": "pnpm exec vsce package"
   },
   "devDependencies": {
     "eslint": "^3.6.0",
