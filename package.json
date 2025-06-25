@@ -13,7 +13,7 @@
   },
   "license": "MIT",
   "engines": {
-    "vscode": "^1.5.0"
+    "vscode": "^1.74.0"
   },
   "categories": [
     "Other"
@@ -49,14 +49,15 @@
   },
   "scripts": {
     "test": "pnpm exec vscode-test",
-    "package": "pnpm exec vsce package"
+    "package": "pnpm exec vsce package --no-dependencies"
   },
   "devDependencies": {
-    "@types/vscode": "^1.5.0",
-    "@vscode/test-cli": "^0.0.4",
-    "@vscode/vsce": "^2.22.0",
-    "eslint": "^8.0.0",
-    "typescript": "^5.0.0"
+    "@types/vscode": "^1.74.0",
+    "@vscode/test-cli": "^0.0.11",
+    "@vscode/test-electron": "^2.4.1",
+    "@vscode/vsce": "^3.5.0",
+    "eslint": "^9.29.0",
+    "typescript": "^5.8.3"
   },
   "packageManager": "pnpm@9.15.4+sha512.b2dc20e2fc72b3e18848459b37359a32064663e5627a51e4c74b2c29dd8e8e0491483c3abb40789cfd578bf362fb6ba8261b05f0387d76792ed6e23ea3b1b6a0"
 }
