@@ -30,9 +30,8 @@
 See [sequential-number](https://atom.io/packages/sequential-number).
 
 ### Configuration
-
 + `sequence.replaceSelection`
-Replace initial selections by sequence or not.
+Replace initial selections by sequence or not. default replace.
 ![replaceScreenshot](https://raw.githubusercontent.com/tomoki1207/vscode-input-sequence/images/replaceSelection.gif)
 
 ## LICENSE
