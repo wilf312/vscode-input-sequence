@@ -1,23 +1,23 @@
 'use strict';
-var vscode = require('vscode');
-var Range = vscode.Range;
-var Position = vscode.Position;
-var syntaxRegex = /^([+\-]?[\da-fA-F]+(?:\.\d+)?)\s*([+\-]|(?:\+\+|\-\-))?\s*(\d+)?\s*(?:\:\s*(\d+))?\s*(?:\:\s*(\d+))?$/;
+const vscode = require('vscode');
+const Range = vscode.Range;
+const Position = vscode.Position;
+const syntaxRegex = /^([+\-]?[\da-fA-F]+(?:\.\d+)?)\s*([+\-]|(?:\+\+|\-\-))?\s*(\d+)?\s*(?:\:\s*(\d+))?\s*(?:\:\s*(\d+))?$/;
 
 // this method is called when your extension is activated
 function activate(context) {
-  var insertCmd = vscode.commands.registerCommand('insertSequentialNumbers', function () {
-    var editor = vscode.window.activeTextEditor;
-    var initialSelections = editor.selections.sort(sortSelection);
-    var inputOptions = {};
-    var undoStopBefore = true;
+  const insertCmd = vscode.commands.registerCommand('insertSequentialNumbers', function () {
+    const editor = vscode.window.activeTextEditor;
+    const initialSelections = editor.selections.sort(sortSelection);
+    const inputOptions = {};
+    let undoStopBefore = true;
     inputOptions.placeHolder = "<start> <operator> <step> : <digit> : <radix>";
     inputOptions.validateInput = function (param) {
       if (param === "") {
         perform(initialSelections, editor, {}, { undoStopBefore: undoStopBefore, undoStopAfter: false });
         return;
       }
-      var test = parseInput(param);
+      const test = parseInput(param);
       if (!test) {
         return 'Syntax error. The rule is "<start> <operator> <step> : <digit> : <radix>".';
       }
@@ -35,7 +35,7 @@ function activate(context) {
           return;
         }
         // confirm input.
-        var options = parseInput(value);
+        const options = parseInput(value);
         perform(initialSelections, editor, options, { undoStopBefore: false, undoStopAfter: true });
       });
   });
@@ -54,28 +54,28 @@ function sortSelection(a, b) {
 }
 
 function perform(initial, editor, options, undoStop) {
-  var currentSelection = editor.selections.sort(sortSelection);
-  var replaceSelection = vscode.workspace.getConfiguration("sequence").replaceSelection;
+  const currentSelection = editor.selections.sort(sortSelection);
+  const replaceSelection = vscode.workspace.getConfiguration("sequence").replaceSelection;
   editor.edit(function (builder) {
     initial.forEach(function (selection, index) {
-      var endOfInitialSelection = replaceSelection ? selection.start.character : selection.end.character + (currentSelection[index].start.character - selection.start.character);
+      const endOfInitialSelection = replaceSelection ? selection.start.character : selection.end.character + (currentSelection[index].start.character - selection.start.character);
       builder.replace(new Range(new Position(selection.end.line, endOfInitialSelection), currentSelection[index].end), calculate(index, options));
     });
   }, undoStop);
 }
 
 function parseInput(input) {
-  var matches = input.match(syntaxRegex);
+  const matches = input.match(syntaxRegex);
   if (!matches) {
     return null;
   }
 
-  var radix = matches[5] ? parseInt(matches[5], 10) : 10;
-  var start = parseInt(matches[1], radix);
-  var operator = matches[2] || "+";
-  var step = isNaN(matches[3]) ? 1 : parseInt(matches[3], 10);
+  const radix = matches[5] ? parseInt(matches[5], 10) : 10;
+  const start = parseInt(matches[1], radix);
+  const operator = matches[2] || "+";
+  const step = isNaN(matches[3]) ? 1 : parseInt(matches[3], 10);
 
-  var digit = parseInt(matches[4], 10);
+  let digit = parseInt(matches[4], 10);
   if (isNaN(digit)) {
     digit = (start.toString() === matches[1]) ? 0 : matches[1].length;
     if (/^[+\-]/.test(matches[1])) {
@@ -93,7 +93,7 @@ function parseInput(input) {
 }
 
 function calculate(index, options) {
-  var value = NaN;
+  let value = NaN;
   switch (options.operator) {
     case "++":
       value = options.start + index;
@@ -112,7 +112,7 @@ function calculate(index, options) {
   }
 
   value = paddingZero(value, options.digit, options.radix);
-  var hasAlpha = options.input.match(/([a-fA-F])/);
+  const hasAlpha = options.input.match(/([a-fA-F])/);
   if (hasAlpha) {
     // for hex.
     return hasAlpha[1] == hasAlpha[1].toLowerCase() ? value.toLowerCase() : value.toUpperCase();
@@ -127,10 +127,10 @@ function paddingZero(num, dig, radix) {
   if (!radix) {
     radix = 10;
   }
-  var number = num.toString(radix);
-  var numAbs = number.replace("-", "");
-  var digit = Math.max(numAbs.length, dig);
-  var result = "";
+  const number = num.toString(radix);
+  const numAbs = number.replace("-", "");
+  const digit = Math.max(numAbs.length, dig);
+  let result = "";
   if (0 <= number.indexOf("-")) {
     result += "-";
   }
